@@ -7,3 +7,5 @@ This anki-addon maybe useful for those people who want to search image(s) on Int
 
 No GUI. You can setup you environment in config.py. The most logic is in Core.py.
 
+Tested in Fedora 28. Centos 7 should be OK. Have no time to test on other system operations yet.
+
