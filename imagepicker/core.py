@@ -664,7 +664,7 @@ class Core:
     def audit(self):
         self.log.info('The number of windows is %s at the moment', len(self.__mydriver.window_handles))
 
-    def setup_logger(self, filename='image-picker.log'):
+    def setup_logger(self, filename=log_file):
         log = logging.getLogger(__name__)
 
         logging.basicConfig(filename=filename,
