@@ -12,6 +12,7 @@ sys.path.append('/usr/lib64/python2.7')
 
 from lxml import etree
 from selenium import webdriver
+from selenium.common.exceptions import StaleElementReferenceException
 from config import *
 import urllib2
 import logging
@@ -23,7 +24,7 @@ class Core:
         self.log = self.setup_logger()
 
         self._anki_browser = None
-        self.threadLock = threading.Lock()
+        self.thread_lock = threading.Lock()
         self.number_of_opening_tabs = 20
         self.max_number_of_opening_tabs = 100
         self.__mydriver = None
@@ -545,8 +546,19 @@ class Core:
             from httplib import ResponseNotReady
             try:
 
+                if self._element_exist_by_xpath(ddg_heading_xpath) is False:
+                    continue
+
+                # Do this job in a thread
+                thread.start_new_thread(self._insert_input_into_page_source, ('imagepicker_identity_id',))
+
+                is_selected = self._is_selected_by_id('imagepicker_identity_id')
+                if is_selected is False:
+                    continue
+
                 heading = self.__mydriver.find_element_by_xpath(ddg_heading_xpath)
-                self.log.info('Got heading [%s] ' + str(heading))
+                self.log.info('Got heading [%s] ' + str(heading.text))
+
                 ht = str(heading.text)
                 # really url of article
                 reallyUrlOfArticle = heading.get_attribute('href')
@@ -626,6 +638,19 @@ class Core:
 
         return content, write2Disk
 
+    def _insert_input_into_page_source(self, imagepicker_identity_id):
+        try:
+            with self.thread_lock:
+                if self._element_exist_by_id(imagepicker_identity_id) is False:
+                    # insert <a>...</a> into page source
+                    tag_check_box = "<input id=\"imagepicker_identity_id\" type=\"checkbox\"/>"
+                    tag_a = self.__mydriver.find_element_by_xpath(ddg_heading_xpath) \
+                        .find_element_by_xpath("..")
+                    self.__mydriver.execute_script("var ele=arguments[0]; ele.innerHTML = '%s';"
+                                                       % (tag_a.get_attribute('innerHTML') + tag_check_box), tag_a)
+        except:
+            import traceback
+            self.log.error(traceback.format_exc())
 
     # close the slider
     def closeTheSlider(self):
@@ -647,3 +672,20 @@ class Core:
                             format='%(asctime)s - %(name)s - %(threadName)s -  %(levelname)s - %(message)s')
 
         return log
+
+    def _element_exist_by_id(self, id):
+        try:
+            self.__mydriver.find_element_by_id(id)
+            return True
+        except:
+            return False
+
+    def _element_exist_by_xpath(self, xpath):
+        self.__mydriver.find_element_by_xpath(xpath)
+        return True
+
+    def _is_selected_by_id(self, id):
+        try:
+            return self.__mydriver.find_element_by_id(id).is_selected()
+        except StaleElementReferenceException:
+            return False
