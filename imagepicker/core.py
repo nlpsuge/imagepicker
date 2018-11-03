@@ -559,7 +559,7 @@ class Core:
                 heading = self.__mydriver.find_element_by_xpath(ddg_heading_xpath)
                 self.log.info('Got heading [%s] ' + str(heading.text))
 
-                ht = str(heading.text)
+                heading_text = str(heading.text)
                 # really url of article
                 reallyUrlOfArticle = heading.get_attribute('href')
                 self.log.info('Got really url of article [%s]', reallyUrlOfArticle)
@@ -581,13 +581,15 @@ class Core:
 
                     import os
 
-                    imageFileName = self.getFileName(reallyUrlImage, ht, word)
+                    imageFileName = self.getFileName(reallyUrlImage, heading_text, word)
                     self.log.info('The name of image file is [%s]', imageFileName)
 
                     self.__downloadImage(reallyUrlImage, ddgImageThumbnailUrl, imageFileName, 1)
 
+                    title = heading_text
+
                     # need to get complete title from origin article
-                    if ht.endswith('...'):
+                    if heading_text.endswith('...'):
                         # not youtube
                         # spent too long time to fetch the heading from youtube.com
                         # but only return 'YouTube'
@@ -595,9 +597,8 @@ class Core:
                             title = self.__getTitle(reallyUrlOfArticle)
                             if len(title) == 0:
                                 # Use ddg's title
-                                title = ht
-                    else:
-                        title = ht
+                                title = heading_text
+
                     self.log.info('Using title [%s]', title)
 
                     content = content + self.fillTemplete(imageFileName, title, reallyUrlOfArticle)
