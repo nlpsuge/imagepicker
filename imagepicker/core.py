@@ -12,7 +12,8 @@ sys.path.append('/usr/lib64/python2.7')
 
 from lxml import etree
 from selenium import webdriver
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import StaleElementReferenceException, InvalidSessionIdException, \
+    SessionNotCreatedException
 from config import *
 import urllib2
 import logging
@@ -103,7 +104,7 @@ class Core:
             self._open_many(browser)
             self.audit()
             self.__getImageInfo(note)
-        except selenium.common.exceptions.SessionNotCreatedException:
+        except (SessionNotCreatedException, InvalidSessionIdException):
             self.log.error('Failed to self.doSearch(), opening a new browser instance')
             import traceback
             self.log.error(traceback.format_exc())
