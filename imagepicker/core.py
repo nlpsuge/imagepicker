@@ -648,8 +648,12 @@ class Core:
                     tag_check_box = "<input id=\"imagepicker_identity_id\" type=\"checkbox\"/>"
                     tag_a = self.__mydriver.find_element_by_xpath(ddg_heading_xpath) \
                         .find_element_by_xpath("..")
+
+                    # Replace "'" to "’"
+                    # Fix JavascriptException: Message: SyntaxError: unexpected token: identifier
+                    new_inner_html = tag_a.get_attribute('innerHTML').replace('\'', '’')
                     self.__mydriver.execute_script("var ele=arguments[0]; ele.innerHTML = '%s';"
-                                                       % (tag_a.get_attribute('innerHTML') + tag_check_box), tag_a)
+                                                       % (new_inner_html + tag_check_box), tag_a)
         except:
             import traceback
             self.log.error(traceback.format_exc())
