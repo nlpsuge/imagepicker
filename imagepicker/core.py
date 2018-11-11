@@ -51,7 +51,7 @@ class Core:
             if len(self.newList) == 0:
                 self.newList = self.getAllNoteList(mw, list(mw.col.sched._newQueue))
                 self.log.info('Got newList, length: [%d], newList: [%s]', len(self.newList), self.note_to_string(self.newList))
-            if len(self.revList) == 0:
+            if search_review_cards and len(self.revList) == 0:
                 self.revList = self.getAllNoteList(mw, list(mw.col.sched._revQueue))
                 self.log.info('Got revList, length: [%d], revList: [%s]', len(self.revList), self.note_to_string(self.revList))
 
@@ -65,7 +65,7 @@ class Core:
             for index in range(half):
                 if len(self.newList) > 0:
                     thread.start_new_thread(self.__openUrlFromQueue, (self.newList.pop(), True))
-                if len(self.revList) > 0:
+                if search_review_cards and len(self.revList) > 0:
                     thread.start_new_thread(self.__openUrlFromQueue, (self.revList.pop(), True))
 
     @staticmethod
