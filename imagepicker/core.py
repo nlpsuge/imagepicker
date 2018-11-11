@@ -12,7 +12,8 @@ sys.path.append('/usr/lib64/python2.7')
 
 from lxml import etree
 from selenium import webdriver
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import StaleElementReferenceException, InvalidSessionIdException, \
+    SessionNotCreatedException
 from config import *
 import urllib2
 import logging
@@ -50,7 +51,7 @@ class Core:
             if len(self.newList) == 0:
                 self.newList = self.getAllNoteList(mw, list(mw.col.sched._newQueue))
                 self.log.info('Got newList, length: [%d], newList: [%s]', len(self.newList), self.note_to_string(self.newList))
-            if len(self.revList) == 0:
+            if search_review_cards and len(self.revList) == 0:
                 self.revList = self.getAllNoteList(mw, list(mw.col.sched._revQueue))
                 self.log.info('Got revList, length: [%d], revList: [%s]', len(self.revList), self.note_to_string(self.revList))
 
@@ -64,7 +65,7 @@ class Core:
             for index in range(half):
                 if len(self.newList) > 0:
                     thread.start_new_thread(self.__openUrlFromQueue, (self.newList.pop(), True))
-                if len(self.revList) > 0:
+                if search_review_cards and len(self.revList) > 0:
                     thread.start_new_thread(self.__openUrlFromQueue, (self.revList.pop(), True))
 
     @staticmethod
@@ -103,7 +104,7 @@ class Core:
             self._open_many(browser)
             self.audit()
             self.__getImageInfo(note)
-        except selenium.common.exceptions.SessionNotCreatedException:
+        except (SessionNotCreatedException, InvalidSessionIdException):
             self.log.error('Failed to self.doSearch(), opening a new browser instance')
             import traceback
             self.log.error(traceback.format_exc())
@@ -559,7 +560,7 @@ class Core:
                 heading = self.__mydriver.find_element_by_xpath(ddg_heading_xpath)
                 self.log.info('Got heading [%s] ' + str(heading.text))
 
-                ht = str(heading.text)
+                heading_text = str(heading.text)
                 # really url of article
                 reallyUrlOfArticle = heading.get_attribute('href')
                 self.log.info('Got really url of article [%s]', reallyUrlOfArticle)
@@ -581,13 +582,15 @@ class Core:
 
                     import os
 
-                    imageFileName = self.getFileName(reallyUrlImage, ht, word)
+                    imageFileName = self.getFileName(reallyUrlImage, heading_text, word)
                     self.log.info('The name of image file is [%s]', imageFileName)
 
                     self.__downloadImage(reallyUrlImage, ddgImageThumbnailUrl, imageFileName, 1)
 
+                    title = heading_text
+
                     # need to get complete title from origin article
-                    if ht.endswith('...'):
+                    if heading_text.endswith('...'):
                         # not youtube
                         # spent too long time to fetch the heading from youtube.com
                         # but only return 'YouTube'
@@ -595,9 +598,8 @@ class Core:
                             title = self.__getTitle(reallyUrlOfArticle)
                             if len(title) == 0:
                                 # Use ddg's title
-                                title = ht
-                    else:
-                        title = ht
+                                title = heading_text
+
                     self.log.info('Using title [%s]', title)
 
                     content = content + self.fillTemplete(imageFileName, title, reallyUrlOfArticle)
@@ -646,8 +648,12 @@ class Core:
                     tag_check_box = "<input id=\"imagepicker_identity_id\" type=\"checkbox\"/>"
                     tag_a = self.__mydriver.find_element_by_xpath(ddg_heading_xpath) \
                         .find_element_by_xpath("..")
+
+                    # Replace "'" to "’"
+                    # Fix JavascriptException: Message: SyntaxError: unexpected token: identifier
+                    new_inner_html = tag_a.get_attribute('innerHTML').replace('\'', '’')
                     self.__mydriver.execute_script("var ele=arguments[0]; ele.innerHTML = '%s';"
-                                                       % (tag_a.get_attribute('innerHTML') + tag_check_box), tag_a)
+                                                       % (new_inner_html + tag_check_box), tag_a)
         except:
             import traceback
             self.log.error(traceback.format_exc())

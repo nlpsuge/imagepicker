@@ -35,3 +35,5 @@ port = '8086'
 
 # In user home by default
 log_file = 'image-picker.log'
+
+search_review_cards = False
