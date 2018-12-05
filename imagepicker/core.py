@@ -534,7 +534,14 @@ class Core:
         # software should recognize
         if len(postfix) > 3:
             postfix = 'jpg'
-        return word + '_' + md5 + '.' + postfix
+
+        tripped_word = word.\
+            replace('(', '_').\
+            replace(')', '_').\
+            replace(' ', '_').\
+            replace('/', '_').\
+            replace('\\', '_')
+        return tripped_word + '_' + md5 + '.' + postfix
 
     def __main_loop(self, note):
         word = unicode.strip(note['Front'])
