@@ -9,5 +9,5 @@ No GUI. You can setup your environment in config.py. The most logic is in core.p
 
 Tested in Fedora 28/29. CentOS 7 should be OK. Have no time to test on other system operations yet.
 
-Support to set proxy for dowloading imgage or obtaining the title of related article in config.py. Leave 'protocol' or 'server' or 'port' empty to avoid using proxy. You can use SwitchyOmega(https://github.com/FelisCatus/SwitchyOmega) when search images on DuckDuckGo.
+Support to set proxy for downloading image or obtaining the title of related article in config.py. Leave 'protocol' or 'server' or 'port' empty to avoid using proxy. You can use SwitchyOmega(https://github.com/FelisCatus/SwitchyOmega) when search images on DuckDuckGo.
 
