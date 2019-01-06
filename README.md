@@ -1,5 +1,5 @@
 # imagepicker
-An add-on of searching word and importing image(s) for Anki. 
+An add-on of searching word and importing image(s) for Anki 2.0.25. 
 
 By using Selenium with geckodriver.
 
