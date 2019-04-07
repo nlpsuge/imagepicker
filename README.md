@@ -11,3 +11,5 @@ Tested in Fedora 28/29. CentOS 7 should be OK. Have no time to test on other sys
 
 Support to set proxy for downloading image or obtaining the title of related article in config.py. Leave 'protocol' or 'server' or 'port' empty to avoid using proxy. You can use SwitchyOmega(https://github.com/FelisCatus/SwitchyOmega) when search images on DuckDuckGo.
 
+# NOTE
+Only be tested on Anki 2.0.52
